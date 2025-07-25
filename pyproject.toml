@@ -1,0 +1,25 @@
+[project]
+name = "jarvis"
+version = "0.1.0"
+description = "Assistente"
+authors = [
+    {name = "Bruno Dutra",email = "brunodutra1912@gmail.com"}
+]
+readme = "README.md"
+requires-python = ">=3.10"
+dependencies = [
+    "scikit-learn (>=1.7.1,<2.0.0)",
+    "gtts (>=2.5.4,<3.0.0)",
+    "pygame (>=2.6.1,<3.0.0)",
+    "edge-tts (>=7.0.2,<8.0.0)",
+    "pytelegrambotapi (>=4.27.0,<5.0.0)",
+    "python-dotenv (>=1.1.1,<2.0.0)"
+]
+
+[tool.poetry]
+packages = [{include = "jarvis", from = "src"}]
+
+
+[build-system]
+requires = ["poetry-core>=2.0.0,<3.0.0"]
+build-backend = "poetry.core.masonry.api"
