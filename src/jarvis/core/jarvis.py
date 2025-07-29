@@ -31,7 +31,15 @@ class Jarvis:
                 resposta = interface.receber_entrada(pergunta)
                 parametros[chave] = resposta
 
-            resposta = modulo.executar(**parametros)
+            resultado = modulo.executar(**parametros)
+
+            if isinstance(resultado, tuple):
+                resposta = resultado[0]
+                fala = resultado[1] if len(resultado) > 1 else resposta
+            else:
+                resposta = resultado
+                fala = resultado
+
             interface.exibir_resposta(resposta)
-            falar(resposta)
+            falar(fala)
             registrar_log(frase, acao, parametros, resposta)
