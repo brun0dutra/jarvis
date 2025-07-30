@@ -56,11 +56,26 @@ class Clima(ModuloBase):
         self.por_sol = timestamp_para_hora(dados["sys"]["sunset"], dados["timezone"])
         self.horario_atual = timestamp_para_hora(dados["dt"], dados["timezone"])
 
-        resumo = (
-            f"Na cidade de {self.cidade} temos {self.clima}, "
-        f"com temperatura de {self.temperatura} graus, e sensassão termica de {self.sensacao} graus. "
-        f"A umidade esta em {self.umidade}%. Temos ventos vindo do {self.vento_dir}, a {self.vento_vel} Km/h. "
-        f"Céu esta {self.nuvens}% coberto de nuvens). A sua visibilidade é de {self.visibilidade} Km. "
-        f"Nascer do sol as {self.nascer_sol}, e o por do sol as {self.por_sol}")
+        resposta = (
+            f"📍 Clima em {self.cidade}, {self.pais}\n"
+            f"🕒 Última atualização: {self.horario_atual}\n"
+            f"🌤️ Condição: {self.clima}\n"
+            f"🌡️ Temperatura: {self.temperatura}°C (Sensação térmica: {self.sensacao}°C)\n"
+            f"🔺 Máx: {self.temp_max}°C | 🔻 Mín: {self.temp_min}°C\n"
+            f"💧 Umidade: {self.umidade}%"
+            f"🌬️ Vento: {self.vento_vel} km/h (Direção: {self.vento_dir}°)\n"
+            f"🔎 Visibilidade: {self.visibilidade} km\n"
+            f"☁️ Cobertura de nuvens: {self.nuvens}%\n"
+            f"📈 Pressão atmosférica: {self.pressao} hPa\n"
+            f"🌅 Nascer do sol: {self.nascer_sol}\n"
+            f"🌇 Pôr do sol: {self.por_sol}\n"
+        )
 
-        return resumo
+        fala = (
+            f"Na cidade de {self.cidade} temos {self.clima},\n "
+        f"com temperatura de {self.temperatura} graus, e sensassão termica de {self.sensacao} graus.\n "
+        f"A umidade esta em {self.umidade}%. Temos ventos vindo do {self.vento_dir}, a {self.vento_vel} Km/h.\n "
+        f"Céu esta {self.nuvens}% coberto de nuvens). A sua visibilidade é de {self.visibilidade} Km.\n "
+        f"Nascer do sol as {self.nascer_sol}, e o por do sol as {self.por_sol}\n")
+
+        return resposta, fala
