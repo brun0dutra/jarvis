@@ -22,9 +22,13 @@ def carregar_modulo(acao: str):
 
 def executar(acao: str, **kwargs):
     try:
-        # Ação vem no formato: "matematica.somar"
-        modulo = importlib.import_module(f"modulos.{acao}")
-        classe_nome = acao.split(".")[-1].capitalize()
+        partes = acao.split(".")
+        *pacote, classe = partes
+        modulo_nome = ".".join(pacote + [classe])
+        classe_nome = classe.capitalize()
+
+        caminho = f"modulos.{modulo_nome}"
+        modulo = importlib.import_module(caminho)
         classe = getattr(modulo, classe_nome)
         instancia = classe()
         return instancia.executar(**kwargs)

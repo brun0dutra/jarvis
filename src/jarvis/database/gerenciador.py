@@ -1,12 +1,8 @@
 import sqlite3
 import os
 
-# Caminho absoluto para o arquivo atual
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-
-# Caminho absoluto para o banco de dados na pasta ../data
-CAMINHO_DB = os.path.join(BASE_DIR, "..", "data", "jarvis.db")
-CAMINHO_DB = os.path.abspath(CAMINHO_DB)  # normaliza
+CAMINHO_DB = os.path.abspath(os.path.join(BASE_DIR, "..", "data", "jarvis.db"))
 
 def conectar_db():
     return sqlite3.connect(CAMINHO_DB)
@@ -14,36 +10,43 @@ def conectar_db():
 def criar_tabelas():
     with conectar_db() as conn:
         cursor = conn.cursor()
-        # Tabela de comandos
+        # Tabela comandos com nova estrutura
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS comandos (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            modulo TEXT NOT NULL,
             acao TEXT NOT NULL,
             frase TEXT NOT NULL
         )
         """)
-        # Tabela de logs
+
+        # Tabela logs com coluna frase
         cursor.execute("""
         CREATE TABLE IF NOT EXISTS logs (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
+            frase TEXT,
             acao TEXT,
             parametros TEXT,
             resposta TEXT,
             data_hora TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
         """)
+
         conn.commit()
 
-def inserir_comando(acao: str, frase: str):
+def inserir_comando(modulo: str, acao: str, frase_exemplo: str):
     with conectar_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO comandos (acao, frase) VALUES (?, ?)", (acao, frase))
+        cursor.execute(
+            "INSERT INTO comandos (modulo, acao, frase) VALUES (?, ?, ?)",
+            (modulo, acao, frase_exemplo)
+        )
         conn.commit()
 
-def listar_comandos() -> list[tuple[str, str]]:
+def listar_comandos() -> list[tuple[str, str, str]]:
     with conectar_db() as conn:
         cursor = conn.cursor()
-        cursor.execute("SELECT acao, frase FROM comandos")
+        cursor.execute("SELECT modulo, acao, frase FROM comandos")
         return cursor.fetchall()
 
 def registrar_log(frase: str, acao: str, parametros: dict, resposta: str):
@@ -54,3 +57,5 @@ def registrar_log(frase: str, acao: str, parametros: dict, resposta: str):
             VALUES (?, ?, ?, ?)
         """, (frase, acao, str(parametros), resposta))
         conn.commit()
+
+print(listar_comandos())

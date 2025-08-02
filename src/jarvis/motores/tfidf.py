@@ -6,18 +6,17 @@ from database.gerenciador import conectar_db
 
 class MotorTFIDF(MotorInterpretacao):
     def __init__(self):
-        # 👉 Lê os comandos do banco de dados
         self.frases = []
         self.mapeamento = []
 
         with conectar_db() as conn:
             cursor = conn.cursor()
-            cursor.execute("SELECT acao, frase FROM comandos")
+            cursor.execute("SELECT modulo, acao, frase FROM comandos")
             linhas = cursor.fetchall()
 
-            for acao, frase in linhas:
+            for modulo, acao, frase in linhas:
                 self.frases.append(frase)
-                self.mapeamento.append(acao)
+                self.mapeamento.append(f"{modulo}.{acao}")  # Ex: clima.previsaohora
 
         self.vetor = TfidfVectorizer()
         self.matriz = self.vetor.fit_transform(self.frases)
@@ -27,12 +26,12 @@ class MotorTFIDF(MotorInterpretacao):
         similaridades = cosine_similarity(entrada, self.matriz)
 
         indice = similaridades.argmax()
-        acao = self.mapeamento[indice]
+        acao_completa = self.mapeamento[indice]
 
         try:
-            modulo = carregar_modulo(acao)
+            modulo = carregar_modulo(acao_completa)
             parametros, faltando = modulo.extrair_parametros(frase)
-            return acao, parametros, faltando
+            return acao_completa, parametros, faltando
         except Exception as e:
             print(f"[Erro ao extrair parâmetros]: {e}")
-            return acao, {}, {}
+            return acao_completa, {}, {}
