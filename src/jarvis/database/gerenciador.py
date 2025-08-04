@@ -57,5 +57,4 @@ def registrar_log(frase: str, acao: str, parametros: dict, resposta: str):
             VALUES (?, ?, ?, ?)
         """, (frase, acao, str(parametros), resposta))
         conn.commit()
-
-print(listar_comandos())
+        
