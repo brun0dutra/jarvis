@@ -159,7 +159,7 @@ class Previsaografico(ModuloBase):
         plt.tight_layout()
 
         # Nome do arquivo com base no dado
-        nome_arquivo = f"grafico_{dado}_{modo}_{quantidade}.png"
+        nome_arquivo = f"src/jarvis/modulos/clima/graficos/grafico_{dado}_{modo}_{quantidade}.png"
         plt.savefig(nome_arquivo, dpi=100)
         plt.close()
 
