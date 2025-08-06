@@ -41,5 +41,5 @@ class Jarvis:
                 fala = resultado
 
             interface.exibir_resposta(resposta)
-            falar(fala)
+            interface.falar_resposta(fala)
             registrar_log(frase, acao, parametros, resposta)

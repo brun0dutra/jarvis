@@ -1,9 +1,6 @@
 import asyncio
 import edge_tts
 import tempfile
-import pygame
-import time
-import os
 from voz.base import LocutorBase
 
 class EdgeLocutor(LocutorBase):
@@ -11,18 +8,20 @@ class EdgeLocutor(LocutorBase):
         comunicador = edge_tts.Communicate(texto, voice="pt-BR-AntonioNeural")
         await comunicador.save(arquivo)
 
-    def falar(self, texto: str):
+    def gerar_fala(self, texto: str) -> str:
+        """
+        Gera o áudio da fala e retorna o caminho do arquivo gerado (.mp3).
+        Não toca o áudio.
+        """
         try:
-            with tempfile.NamedTemporaryFile(delete=False, suffix=".mp3") as tmpfile:
-                asyncio.run(self.gerar_audio(texto, tmpfile.name))
+            tmpfile = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+            caminho = tmpfile.name
+            tmpfile.close()  # Fechar para o edge-tts poder escrever nele
 
-                pygame.mixer.init()
-                pygame.mixer.music.load(tmpfile.name)
-                pygame.mixer.music.play()
+            asyncio.run(self.gerar_audio(texto, caminho))
 
-                while pygame.mixer.music.get_busy():
-                    time.sleep(0.1)
-
-                os.remove(tmpfile.name)
+            return caminho  # Caminho do arquivo gerado
         except Exception as e:
             print(f"[Erro na fala com Edge TTS]: {e}")
+            return None
+        

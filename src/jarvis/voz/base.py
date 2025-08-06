@@ -2,5 +2,5 @@ from abc import ABC, abstractmethod
 
 class LocutorBase(ABC):
     @abstractmethod
-    def falar(self, texto: str):
+    def gerar_fala(self, texto: str):
         pass

@@ -3,6 +3,8 @@ import threading
 from queue import Queue
 import os
 from dotenv import load_dotenv
+from pydub import AudioSegment
+from core.locutor import carregar_locutor
 
 class InterfaceTelegram:
     def __init__(self):
@@ -31,3 +33,23 @@ class InterfaceTelegram:
     def exibir_resposta(self, resposta):
         if self.chat_id:
             self.bot.send_message(self.chat_id, resposta)
+
+    def falar_resposta(self, resposta):
+        
+        def converter_para_ogg(caminho_mp3: str) -> str:
+            caminho_ogg = caminho_mp3.replace(".mp3", ".ogg")
+            AudioSegment.from_mp3(caminho_mp3).export(caminho_ogg, format="ogg", codec="libopus")
+            return caminho_ogg
+
+        locutor = carregar_locutor()
+        caminho_do_auido = locutor(resposta)
+        caminho_ogg = converter_para_ogg(caminho_do_auido)        
+
+        try:
+            with open(caminho_ogg, 'rb') as audio:
+                    self.bot.send_voice(chat_id=self.chat_id, voice=audio)
+        finally:
+            if caminho_do_auido:
+                os.remove(caminho_do_auido)
+            if caminho_ogg:
+                os.remove(caminho_ogg)
