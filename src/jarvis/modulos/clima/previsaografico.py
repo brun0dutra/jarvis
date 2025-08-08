@@ -164,5 +164,5 @@ class Previsaografico(ModuloBase):
         plt.close()
 
         texto = f"Gráfico de {dado} salvo em: {nome_arquivo}"
-        fala = f"Aqui está o gráfico de {dado} para os próximos {quantidade} {modo}."
+        fala = f"Aqui está o gráfico de {dado} para {quantidade} {modo}."
         return texto, fala

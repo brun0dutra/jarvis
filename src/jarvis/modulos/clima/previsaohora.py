@@ -26,7 +26,7 @@ class Previsaohora(ModuloBase):
             qtd = int(match.group(1))
             parametros["quantidade_horas"] = max(1, min(qtd, 48))
         else:
-            parametros["quantidade_horas"] = 48
+            parametros["quantidade_horas"] = 24
 
         intencoes = {
             "temperatura": ["temperatura", "calor", "frio", "sensação", "termica", "indici uv", "raios uv", "raios do sol", "sol"],
@@ -153,5 +153,5 @@ class Previsaohora(ModuloBase):
                 )
 
         texto_final = "\n".join(resultado)
-        fala_final = f"Aqui está a previsão para as próximos {quantidade} horas."
+        fala_final = f"Aqui está a previsão para as próximas {quantidade} horas."
         return texto_final, fala_final

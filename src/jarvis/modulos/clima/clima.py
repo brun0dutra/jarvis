@@ -3,6 +3,7 @@ import os
 from datetime import datetime, timedelta
 from modulos.base import ModuloBase
 from dotenv import load_dotenv
+import re
 
 class ClimaAntigo(ModuloBase):
     def __init__(self):
@@ -89,25 +90,29 @@ class Clima(ModuloBase):
         self._link = f"https://api.openweathermap.org/data/3.0/onecall?lat={self._lat}&lon={self._lon}&appid={self._token}&units=metric&lang=pt_br"
 
     def extrair_parametros(self, frase: str) -> tuple[dict, dict]:
+            
             intencoes = {
-            "temperatura": ["temperatura", "graus", "calor", "frio", "termômetro"],
-            "chuva": ["chuva", "vai chover", "precipitação"],
-            "vento": ["vento", "rajadas", "soprando", "ventania"],
-            "umidade": ["umidade", "úmido", "seco"],
-            "uv": ["índice uv", "uv", "raios ultravioleta"],
-            "visibilidade": ["visibilidade", "enxergar", "neblina"],
-            "pressao": ["pressão", "barômetro"],
-            "nuvens": ["nuvens", "nublado", "céu"],
-            "ponto_orvalho": ["ponto de orvalho", "orvalho", "condensação"],
-            "nascer_por": ["nascer do sol", "pôr do sol", "amanhecer", "anoitecer"],
-            "completo": ["clima", "tempo", "atualização", "situação geral", "como está"]
+            "temperatura": ["temperatura", "graus", "calor", "frio"],
+            "chuva": ["chuva", "chover", "vai chover", "precipitação"],
+            "vento": ["vento", "rajadas", "soprando", "ventania", "direção"],
+            "umidade": ["umidade", "úmido", "seco", "umido"],
+            "uv": ["uv", "raios ultravioleta"],
+            "visibilidade": ["visibilidade", "enxergar", "nevoeiro"],
+            "pressao": ["pressão", "pressao", "barômetro"],
+            "nuvens": ["nuvens", "céu", "ceu"],
+            "ponto_orvalho": ["orvalho", "condensação"],
+            "nascer_por": ["nascer do sol", "pôr do sol", "amanhecer", "anoitecer", "nasce", "amanhece", "anoitece"],
+            "completo": ["clima", "tempo", "situação geral"]
         }
 
-            for chave, palavras in intencoes.items():
-                if any(p in frase.lower() for p in palavras):
-                    return {"dado": chave}, {}
+            frase = frase.lower()
 
-                return {"dado": "completo"}, {}
+            for chave, palavras in intencoes.items():
+                for palavra in palavras:
+                    if re.search(rf"\b{re.escape(palavra)}\b", frase):
+                        return {"dado": chave}, {}
+
+            return {"dado":"completo"}, {}
     
     def executar(self, **kwargs):
         dados = requests.get(self._link).json()
@@ -214,7 +219,7 @@ class Clima(ModuloBase):
                 f"O sol nasce às {nascer_sol} e se põe às {por_sol}."
             )
 
-        else:  # Caso padrão: clima completo
+        elif dado == "completo":
             texto_final = (
                 f"\n🕒 Horario: {horario_atual}\n"
                 f"🌤️ Clima: {descricao}\n"

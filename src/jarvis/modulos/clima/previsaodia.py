@@ -20,7 +20,9 @@ class Previsaodia(ModuloBase):
 
         # Extrair quantidade de dias (1 a 7)
         match = re.search(r"(\d{1})\s*(dias|dia)?", frase)
-        if match:
+        if "amanha" in frase:
+            parametros["quantidade_dias"] = 1
+        elif match:
             qtd = int(match.group(1))
             parametros["quantidade_dias"] = max(1, min(qtd, 7))
         else:
@@ -28,7 +30,7 @@ class Previsaodia(ModuloBase):
 
         intencoes = {
             "temperatura": ["temperatura", "calor", "frio", "sensação", "termica", "uv", "sol"],
-            "chuva": ["chuva", "precipitação", "probabilidade", "volume", "milímetros", "vai chover"],
+            "chuva": ["chuva", "precipitação", "probabilidade", "volume", "milímetros", "vai chover", "chove"],
             "umidade": ["umidade", "úmido", "seco"],
             "vento": ["vento", "rajada", "direção"],
             "clima": ["clima", "condição", "tempo", "nuvem", "ensolarado"],
@@ -87,10 +89,14 @@ class Previsaodia(ModuloBase):
 
             if dado == "temperatura":
                 resultado.append(f"{data}\n"
-                                 f"🌡️ Manhã: {temperatura['morn']}°C | Tarde: {temperatura['day']}°C\n"
-                                 f"🌙 Noite: {temperatura['night']}°C | Madrugada: {temperatura['eve']}°C\n"
-                                 f"🌡️ Min: {temperatura['min']}°C | Max: {temperatura['max']}°C\n"
-                                 f"🥵 Sensação: Dia {sensacao['day']}°C | Noite {sensacao['night']}°C\n"
+                                 f"🌡️ Manhã: {temperatura['morn']}°C\n" 
+                                 f"🌡️ Tarde: {temperatura['day']}°C\n"
+                                 f"🌙 Noite: {temperatura['night']}°C\n"
+                                 f"🌙 Madrugada: {temperatura['eve']}°C\n"
+                                 f"🌡️ Min: {temperatura['min']}°C\n"
+                                 f"🌡️ Max: {temperatura['max']}°C\n"
+                                 f"🥵 Sensação: Dia {sensacao['day']}°C\n"
+                                 f"🥵 Noite {sensacao['night']}°C\n"
                                  f"☀️ UV: {uv}\n")
 
             elif dado == "chuva":
@@ -128,23 +134,37 @@ class Previsaodia(ModuloBase):
 
             elif dado == "lua":
                 resultado.append(f"{data}\n"
-                                 f"🌙 Nascer: {nascer_lua} | Pôr: {por_lua}\n"
+                                 f"🌙 Nascer: {nascer_lua}"
+                                 f"🌙 Pôr: {por_lua}\n"
                                  f"🌘 Fase da lua (0–1): {fase_lua:.2f}\n")
 
             else:
                 resultado.append(f"\n📅 {data}\n"
                                  f"🌤️ Clima: {descricao}\n"
-                                 f"🌡️ Manhã: {temperatura['morn']}°C | Tarde: {temperatura['day']}°C\n"
-                                 f"🌙 Noite: {temperatura['night']}°C | Madrugada: {temperatura['eve']}°C\n"
-                                 f"🌡️ Min: {temperatura['min']}°C | Max: {temperatura['max']}°C\n"
-                                 f"🥵 Sensação: Dia {sensacao['day']}°C | Noite {sensacao['night']}°C\n"
-                                 f"💧 Umidade: {umidade}% | ☁️ Nuvens: {nuvens}%\n"
-                                 f"🌬️ Vento: {vento:.1f} km/h | 💨 Rajadas: {rajadas:.1f} km/h\n"
+                                 f"🌡️ Manhã: {temperatura['morn']}°C\n"
+                                 f"🌡️ Tarde: {temperatura['day']}°C\n"
+                                 f"🌙 Noite: {temperatura['night']}°C" 
+                                 f"🌙 Madrugada: {temperatura['eve']}°C\n"
+                                 f"🌡️ Min: {temperatura['min']}°C\n"
+                                 f"🌡️ Max: {temperatura['max']}°C\n"
+                                 f"🥵 Sensação: Dia {sensacao['day']}°C\n"
+                                 f"🥵 Sensação: Noite {sensacao['night']}°C\n"
+                                 f"💧 Umidade: {umidade}%\n"
+                                 f"☁️ Nuvens: {nuvens}%\n"
+                                 f"🌬️ Vento: {vento:.1f} km/h\n"
+                                 f"💨 Rajadas: {rajadas:.1f} km/h\n"
                                  f"🧭 Direção do vento: {self.direcao_vento_em_texto(vento_dir)} ({vento_dir}°)\n"
-                                 f"🌧️ Prob. de chuva: {prob_chuva:.0f}% | 🌦️ Volume: {volume_chuva} mm | ❄️ Neve: {volume_neve} mm\n"
-                                 f"☀️ UV: {uv} | 🎚️ Pressão: {pressao} hPa | 🌫️ Orvalho: {orvalho}°C\n"
-                                 f"🌅 Nascer do sol: {nascer_sol} | 🌇 Pôr do sol: {por_sol}\n"
-                                 f"🌙 Lua: nasce {nascer_lua}, se põe {por_lua} — Fase {fase_lua:.2f}\n")
+                                 f"🌧️ Prob. de chuva: {prob_chuva:.0f}%\n"
+                                 f"🌦️ Volume: {volume_chuva} mm\n" 
+                                 f"❄️ Neve: {volume_neve} mm\n"
+                                 f"☀️ UV: {uv}\n" 
+                                 f"🎚️ Pressão: {pressao} hPa\n" 
+                                 f"🌫️ Orvalho: {orvalho}°C\n"
+                                 f"🌅 Nascer do sol: {nascer_sol}\n"
+                                 f"🌇 Pôr do sol: {por_sol}\n"
+                                 f"🌙 Lua: nasce {nascer_lua}\n" 
+                                 f"🌙 Lua: se põe {por_lua}\n"
+                                 f"🌙 Fase {fase_lua:.2f}\n")
 
         texto_final = "\n".join(resultado)
         fala_final = f"Aqui está a previsão para os próximos {quantidade} dias."
