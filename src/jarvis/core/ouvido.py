@@ -12,3 +12,15 @@ def escutar_ate_parar():
             return "Não entendi."
         except sr.RequestError:
             return "Erro no serviço de voz."
+        
+def transcrever_arquivo(caminho_audio):
+    reconhecedor = sr.Recognizer()
+    with sr.AudioFile(caminho_audio) as fonte:
+        audio = reconhecedor.record(fonte)
+        try:
+            texto = reconhecedor.recognize_google(audio, language="pt-BR")
+            return texto
+        except sr.UnknownValueError:
+            return "Não entendi."
+        except sr.RequestError:
+            return "Erro no serviço de voz."
