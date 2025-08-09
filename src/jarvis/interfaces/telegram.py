@@ -13,6 +13,7 @@ class InterfaceTelegram:
         self.bot = telebot.TeleBot(TOKEN)
         self.fila = Queue()
         self.chat_id = None
+        self.extensoes_imagem = ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp')
 
         @self.bot.message_handler(func=lambda msg: True)
         def receber(msg):
@@ -32,7 +33,13 @@ class InterfaceTelegram:
 
     def exibir_resposta(self, resposta):
         if self.chat_id:
-            self.bot.send_message(self.chat_id, resposta)
+            if os.path.isfile(resposta) and resposta.lower().endswith(self.extensoes_imagem):
+                # Envia a imagem
+                with open(resposta, "rb") as img:
+                    self.bot.send_photo(chat_id=self.chat_id, photo=img, caption="Aqui está o grafico !")
+
+            else:    
+                self.bot.send_message(self.chat_id, resposta)
 
     def falar_resposta(self, resposta):
         

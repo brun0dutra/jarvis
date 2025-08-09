@@ -3,8 +3,13 @@ from core.ouvido import escutar_ate_parar
 from core.locutor import carregar_locutor
 from config.setting import CONFIG
 import pygame, time, os
+from PIL import Image
 
 class InterfaceTerminal(InterfaceBase):
+    def __init__(self):
+        # Extensões válidas
+        self.extensoes_imagem = ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp')
+
     def receber_entrada(self, prompt: str = "") -> str:
 
         frase = input(prompt)
@@ -20,6 +25,10 @@ class InterfaceTerminal(InterfaceBase):
         return frase
 
     def exibir_resposta(self, texto: str):
+        if os.path.isfile(texto) and texto.lower().endswith(self.extensoes_imagem):
+            img = Image.open(texto)
+            img.show()
+
         print(f"Jarvis: {texto}")
 
     def falar_resposta(self, texto):
