@@ -9,5 +9,8 @@ def carregar_motor():
     elif tipo == "openai":
         from motores.openai import MotorOpenAI
         return MotorOpenAI()
+    elif tipo == "cohere":
+        from motores.cohere import MotorCohere
+        return MotorCohere()
     else:
         raise ValueError(f"Motor de interpretação desconhecido: {tipo}")
