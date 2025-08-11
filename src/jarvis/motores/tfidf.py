@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import TfidfVectorizer
 from sklearn.metrics.pairwise import cosine_similarity
 from core.executor import carregar_modulo
 from database.gerenciador import conectar_db
+import re
 
 class MotorTFIDF(MotorInterpretacao):
     def __init__(self):
@@ -21,8 +22,13 @@ class MotorTFIDF(MotorInterpretacao):
         self.vetor = TfidfVectorizer()
         self.matriz = self.vetor.fit_transform(self.frases)
 
+    def normalizar_numeros(self, frase: str) -> str:
+        # Substitui números inteiros e decimais por [NUM]
+        return re.sub(r'\b\d+(\.\d+)?\b', '[NUM]', frase)
+
     def interpretar(self, frase: str) -> tuple[str, dict, dict]:
-        entrada = self.vetor.transform([frase])
+        frase_normalizada = self.normalizar_numeros(frase)
+        entrada = self.vetor.transform([frase_normalizada])
         similaridades = cosine_similarity(entrada, self.matriz)
 
         indice = similaridades.argmax()
