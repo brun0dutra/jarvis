@@ -37,7 +37,7 @@ class Historico(ModuloBase):
             return dt.replace(tzinfo=self.fuso_local)
         else:
             # Data inicial padrão se banco vazio, ex: 7 dias atrás com fuso local
-            return datetime.now(tz=self.fuso_local) - timedelta(days=7)
+            return datetime.now(tz=self.fuso_local) - timedelta(days=16)
 
     def executar(self, **kwargs):
         self.interface.exibir_resposta("Iniciando coleta do histórico incremental...")

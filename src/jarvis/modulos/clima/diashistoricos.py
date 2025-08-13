@@ -3,6 +3,8 @@ import sqlite3
 import re
 from datetime import datetime, timedelta
 import matplotlib.pyplot as plt
+from zoneinfo import ZoneInfo
+import calendar
 
 class Diashistoricos(ModuloBase):
     def __init__(self):
@@ -33,23 +35,53 @@ class Diashistoricos(ModuloBase):
         parametros = {}
         faltando = {}
 
-        # Extrai quantidade e modo (horas/dias)
-        match = re.search(r"(\d{1,2})\s*(h|hora|horas|d|dia|dias)?", frase)
-        if match:
-            qtd = int(match.group(1))
-            if match.group(2) and "d" in match.group(2):
+        fuso_local = ZoneInfo("America/Sao_Paulo")
+        hoje = datetime.now(tz=fuso_local).date()
+
+        # -------------------------
+        # Palavras-chave fixas
+        # -------------------------
+        if "dessa semana" in frase:
+            data_inicio = hoje - timedelta(days=hoje.weekday())  # Segunda-feira
+            data_fim = hoje
+            parametros["modo"] = "dias"
+            parametros["data_inicio"] = data_inicio
+            parametros["data_fim"] = data_fim
+
+        elif "desse mes" in frase or "desse mês" in frase:
+            data_inicio = hoje.replace(day=1)
+            data_fim = hoje
+            parametros["modo"] = "dias"
+            parametros["data_inicio"] = data_inicio
+            parametros["data_fim"] = data_fim
+
+        elif "mes passado" in frase or "mês passado" in frase:
+            primeiro_deste_mes = hoje.replace(day=1)
+            ultimo_mes = primeiro_deste_mes - timedelta(days=1)
+            data_inicio = ultimo_mes.replace(day=1)
+            ultimo_dia_mes_passado = calendar.monthrange(ultimo_mes.year, ultimo_mes.month)[1]
+            data_fim = ultimo_mes.replace(day=ultimo_dia_mes_passado)
+            parametros["modo"] = "dias"
+            parametros["data_inicio"] = data_inicio
+            parametros["data_fim"] = data_fim
+
+        else:
+            # -------------------------
+            # Fallback: últimos N dias
+            # -------------------------
+            match = re.search(r"(\d{1,2})\s*(d|dia|dias)?", frase)
+            if match:
+                qtd = int(match.group(1))
                 parametros["modo"] = "dias"
                 parametros["quantidade"] = max(1, min(qtd, 30))
             else:
-                parametros["modo"] = "horas"
-                parametros["quantidade"] = max(1, min(qtd, 48))
-        else:
-            faltando["modo"] = "Para horas ou dias?"
-            faltando["quantidade"] = "Qual o período?"
+                faltando["quantidade"] = "Qual o período (em dias)?"
 
+        # -------------------------
         # Intenções mapeadas para dados conhecidos
+        # -------------------------
         intencoes = {
-            "temperatura": ["temperatura", "calor", "frio",],
+            "temperatura": ["temperatura", "calor", "frio"],
             "sensacao": ["sensação térmica", "sensacao termica", "sensação", "sensacao"],
             "pressao": ["pressao", "pressão", "pressão atmosferica"],
             "umidade": ["umidade"],
@@ -85,8 +117,12 @@ class Diashistoricos(ModuloBase):
         conexao = sqlite3.connect(self._db_path)
         cursor = conexao.cursor()
 
-        data_fim = datetime.utcnow().date()
-        data_inicio = data_fim - timedelta(days=quantidade - 1)
+        if kwargs.get("data_inicio") and kwargs.get("data_fim"):
+            data_fim = kwargs.get("data_fim")
+            data_inicio = kwargs.get("data_inicio")
+        else:
+            data_fim = datetime.utcnow().date()
+            data_inicio = data_fim - timedelta(days=quantidade - 1)
 
         if len(col) == 3:
             col_min, col_max, col_media = col
@@ -97,6 +133,13 @@ class Diashistoricos(ModuloBase):
             """, (data_inicio.strftime('%Y-%m-%d'), data_fim.strftime('%Y-%m-%d')))
             resultados = cursor.fetchall()
 
+            resultados = [
+                (data, vmin if vmin is not None else 0,
+                    vmax if vmax is not None else 0,
+                    vmed if vmed is not None else 0)
+                for data, vmin, vmax, vmed in resultados
+            ]
+
         else:
             coluna = col[0]
             cursor.execute(f"""
@@ -105,6 +148,13 @@ class Diashistoricos(ModuloBase):
                 ORDER BY data ASC
             """, (data_inicio.strftime('%Y-%m-%d'), data_fim.strftime('%Y-%m-%d')))
             resultados = cursor.fetchall()
+
+            resultados = [
+                (data, vmin if vmin is not None else 0,
+                    vmax if vmax is not None else 0,
+                    vmed if vmed is not None else 0)
+                for data, vmin, vmax, vmed in resultados
+            ]
 
         conexao.close()
 
