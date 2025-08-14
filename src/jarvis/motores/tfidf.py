@@ -22,12 +22,42 @@ class MotorTFIDF(MotorInterpretacao):
         self.vetor = TfidfVectorizer()
         self.matriz = self.vetor.fit_transform(self.frases)
 
-    def normalizar_numeros(self, frase: str) -> str:
-        # Substitui números inteiros e decimais por [NUM]
-        return re.sub(r'\b\d+(\.\d+)?\b', '[NUM]', frase)
+    def normalizar_e_extrair(self, frase: str) -> tuple[str, dict]:
+        dados = {}
+
+        # Imagens
+        extensoes_imagem = ('.jpg', '.jpeg', '.png', '.gif', '.bmp', '.tiff', '.webp')
+        # Regex que captura caminhos completos, com espaços e acentos
+        padrao_img = r'(/[\w\s\-\./\\áàâãéèêíïóôõöúçÇÁÉÍÓÚ]+?\.(?:' + '|'.join([ext.lstrip('.') for ext in extensoes_imagem]) + r'))'
+
+        imagens = re.findall(padrao_img, frase)
+        dados["imagens"] = imagens
+        frase = re.sub(padrao_img, '[IMG]', frase)
+
+        # Documentos
+        extensoes_doc = ('.txt', '.doc', '.docx')
+        padrao_doc = r'[\w\-/\\:.]+\.(?:' + '|'.join([ext.lstrip('.') for ext in extensoes_doc]) + r')\b'
+        docs = re.findall(padrao_doc, frase)
+        dados["docs"] = docs
+        frase = re.sub(padrao_doc, '[DOC]', frase)
+
+        # Áudios
+        extensoes_audio = ('.mp3', '.wav', '.ogg')
+        padrao_audio = r'[\w\-/\\:.]+\.(?:' + '|'.join([ext.lstrip('.') for ext in extensoes_audio]) + r')\b'
+        audios = re.findall(padrao_audio, frase)
+        dados["audios"] = audios
+        frase = re.sub(padrao_audio, '[AUD]', frase)
+
+        # Números_Inteiros
+        numeros = list(map(float, re.findall(r"\d+(?:\.\d+)?", frase)))
+        dados["numeros"] = numeros
+        frase = re.sub(r'\b\d+(\.\d+)?\b', '[NUM]', frase)
+
+        return frase, dados
 
     def interpretar(self, frase: str) -> tuple[str, dict, dict]:
-        frase_normalizada = self.normalizar_numeros(frase)
+        frase_normalizada, dados = self.normalizar_e_extrair(frase)
+
         entrada = self.vetor.transform([frase_normalizada])
         similaridades = cosine_similarity(entrada, self.matriz)
 
@@ -36,7 +66,7 @@ class MotorTFIDF(MotorInterpretacao):
 
         try:
             modulo = carregar_modulo(acao_completa)
-            parametros, faltando = modulo.extrair_parametros(frase)
+            parametros, faltando = modulo.extrair_parametros(frase, **dados)
             return acao_completa, parametros, faltando
         except Exception as e:
             print(f"[Erro ao extrair parâmetros]: {e}")

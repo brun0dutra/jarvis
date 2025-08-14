@@ -16,20 +16,27 @@ class InterfaceTerminal(InterfaceBase):
         mic = CONFIG.get("microfone", "ligado")
 
         if mic == "ligado":
-            if frase in ["1"]:
+            if frase in ["'"]:
                 frase = escutar_ate_parar()
-                return frase
-            else:
                 return frase
 
         return frase
 
-    def exibir_resposta(self, texto: str):
-        if os.path.isfile(texto) and texto.lower().endswith(self.extensoes_imagem):
-            img = Image.open(texto)
-            img.show()
+    def exibir_resposta(self, conteudo):
 
-        print(f"Jarvis: {texto}")
+        # Garante que sempre vamos trabalhar com uma lista
+        if not isinstance(conteudo, (list)):
+            conteudo = [conteudo]
+
+        for item in conteudo:
+
+            # Se for imagem
+            if os.path.isfile(item) and item.lower().endswith(self.extensoes_imagem):
+                img = Image.open(item)
+                img.show()
+
+            # Se for texto
+            print(f"Jarvis: {item}")
 
     def falar_resposta(self, texto):
         locutor = carregar_locutor()

@@ -2,8 +2,8 @@ import re
 from modulos.base import ModuloBase
 
 class Soma(ModuloBase):
-    def extrair_parametros(self, frase: str) -> tuple[dict, dict]:
-        numeros = list(map(int, re.findall(r"\d+", frase)))
+    def extrair_parametros(self, frase: str, **dados) -> tuple[dict, dict]:
+        numeros = dados.get("numeros", [])
         parametros = {}
         faltando = {}
 

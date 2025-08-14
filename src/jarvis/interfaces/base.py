@@ -6,5 +6,5 @@ class InterfaceBase(ABC):
         pass
 
     @abstractmethod
-    def exibir_resposta(self, texto: str):
+    def exibir_resposta(self, conteudo):
         pass

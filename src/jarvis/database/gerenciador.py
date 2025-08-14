@@ -1,5 +1,5 @@
 import sqlite3
-import os
+import os, json
 
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
 CAMINHO_DB = os.path.abspath(os.path.join(BASE_DIR, "..", "data", "jarvis.db"))
@@ -49,12 +49,18 @@ def listar_comandos() -> list[tuple[str, str, str]]:
         cursor.execute("SELECT modulo, acao, frase FROM comandos")
         return cursor.fetchall()
 
-def registrar_log(frase: str, acao: str, parametros: dict, resposta: str):
+def registrar_log(frase, acao, parametros, resposta):
+    if not isinstance(parametros, (str, type(None))):
+        parametros = json.dumps(parametros, ensure_ascii=False)
+
+    if not isinstance(resposta, (str, type(None))):
+        resposta = json.dumps(resposta, ensure_ascii=False)
+
     with conectar_db() as conn:
         cursor = conn.cursor()
         cursor.execute("""
             INSERT INTO logs (frase, acao, parametros, resposta)
             VALUES (?, ?, ?, ?)
-        """, (frase, acao, str(parametros), resposta))
+        """, (frase, acao, parametros, resposta))
         conn.commit()
         
