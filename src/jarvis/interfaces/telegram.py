@@ -113,14 +113,15 @@ class InterfaceTelegram:
             return caminho_ogg
 
         locutor = carregar_locutor()
-        caminho_do_auido = locutor(resposta)
-        caminho_ogg = converter_para_ogg(caminho_do_auido)        
+        for audio in resposta:
+            caminho_do_auido = locutor(audio)
+            caminho_ogg = converter_para_ogg(caminho_do_auido)        
 
-        try:
-            with open(caminho_ogg, 'rb') as audio:
-                    self.bot.send_voice(chat_id=self.chat_id, voice=audio)
-        finally:
-            if caminho_do_auido:
-                os.remove(caminho_do_auido)
-            if caminho_ogg:
-                os.remove(caminho_ogg)
+            try:
+                with open(caminho_ogg, 'rb') as audio:
+                        self.bot.send_voice(chat_id=self.chat_id, voice=audio)
+            finally:
+                if caminho_do_auido:
+                    os.remove(caminho_do_auido)
+                if caminho_ogg:
+                    os.remove(caminho_ogg)

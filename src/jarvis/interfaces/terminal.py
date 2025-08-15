@@ -40,18 +40,20 @@ class InterfaceTerminal(InterfaceBase):
 
     def falar_resposta(self, texto):
         locutor = carregar_locutor()
-        caminho_do_audio = locutor(texto)
 
-        if caminho_do_audio:
+        for audio in texto:
+            caminho_do_audio = locutor(audio)
 
-            try:
-                pygame.mixer.init()
-                pygame.mixer.music.load(caminho_do_audio)
-                pygame.mixer.music.play()
+            if caminho_do_audio:
 
-                while pygame.mixer.music.get_busy():
-                    time.sleep(0.1)
+                try:
+                    pygame.mixer.init()
+                    pygame.mixer.music.load(caminho_do_audio)
+                    pygame.mixer.music.play()
 
-            finally:
-                if caminho_do_audio:
-                    os.remove(caminho_do_audio)
+                    while pygame.mixer.music.get_busy():
+                        time.sleep(0.1)
+
+                finally:
+                    if caminho_do_audio:
+                        os.remove(caminho_do_audio)
